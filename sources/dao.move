@@ -10,6 +10,8 @@ module DaoWallet::DAO {
     use sui::tx_context::{Self as tx, TxContext, sender};
     use sui::transfer;
 
+    use std::string::{String};
+
     // ----------ERROR-----------
     // Duplicate voting
     const E_DUPLICATE_VOTE: u64 = 0;
@@ -29,7 +31,7 @@ module DaoWallet::DAO {
     
     struct Proposal has key, store {
         id: UID,
-        description: vector<u8>,
+        description: String,
         votes_for: u64,
         votes_against: u64,
         // Minimum number of votes required for a proposal to be approved and executed.
@@ -62,7 +64,7 @@ module DaoWallet::DAO {
     // Event to record proposal creation
     struct ProposalCreatedEvent has copy, drop{
         proposal_id: ID,
-        description: vector<u8>,
+        description: String,
         minimal_votes_required: u64,
         voting_start: u64,
         voting_end: u64,
@@ -94,7 +96,7 @@ module DaoWallet::DAO {
     public fun create_proposal(
         ctx: &mut TxContext,
         c: &Clock, 
-        description: vector<u8>,
+        description: String,
         minimal_votes_required: u64, 
         voting_start: u64, 
         voting_end: u64
