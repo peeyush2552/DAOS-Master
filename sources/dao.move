@@ -169,6 +169,26 @@ module DaoWallet::DAO {
         });
         coin
     }
+    // users can change vote here. 
+    public fun change_vote(
+      proposal: &mut Proposal,
+      vote: &mut Vote,
+      c: &Clock,
+  ) {
+      assert!(timestamp_ms(c) < proposal.voting_end, E_VOTING_ENDED);
+      assert!(vote.dao_id == object::id(proposal), EVoteAndProposalIdMismatch);
+      let value = balance::value(&vote.balance);
+
+      vote.decision = !vote.decision;
+
+      if (vote.decision) {
+        proposal.votes_against = proposal.votes_against - value;
+        proposal.votes_for = proposal.votes_for + value;
+      } else {
+        proposal.votes_for = proposal.votes_for - value;
+        proposal.votes_against = proposal.votes_against + value;
+      };
+  } 
 
     fun destroy_vote(vote: Vote, ctx: &mut TxContext) : Coin<SUI> {
         let Vote {
