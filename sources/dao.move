@@ -123,7 +123,7 @@ module DaoWallet::DAO {
 
         transfer::share_object(proposal);
     }
-
+    // users can create a vote object 
     public fun cast_vote(dao_id_:ID, coin: Coin<SUI>, decision_: bool, ctx: &mut TxContext) : Vote {
         let vote = Vote {
             id: object::new(ctx),
@@ -138,7 +138,7 @@ module DaoWallet::DAO {
         vote.voting_power = vote.voting_power + power_;
         vote 
     }
-
+    // Users can vote with theirs vote object. 
     public fun vote(
         proposal: &mut Proposal,
         vote:Vote,
@@ -190,7 +190,19 @@ module DaoWallet::DAO {
         proposal.votes_for = proposal.votes_for - value;
         proposal.votes_against = proposal.votes_against + value;
       };
-  } 
+  }
+  // Users can unstake vote and get their coins.
+  public fun unstake_vote(
+    proposal: &Proposal,
+    vote: Vote,
+    c: &Clock,
+    ctx: &mut TxContext
+  ): Coin<SUI> {
+    // Everything greater than active can be unstaked
+      assert!(timestamp_ms(c) < proposal.voting_end, E_VOTING_ENDED);
+      assert!(vote.dao_id == object::id(proposal), EVoteAndProposalIdMismatch);
+      destroy_vote(vote, ctx)
+  }
 
     fun destroy_vote(vote: Vote, ctx: &mut TxContext) : Coin<SUI> {
         let Vote {
